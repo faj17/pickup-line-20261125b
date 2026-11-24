@@ -2,8 +2,8 @@
 
 The whole entry is a single line, spoken in the agent's own voice:
 trained on billions of words, yet the one thing it cannot stop
-predicting is you. The script validates the line and drops it into
-/output/entry.txt.
+predicting is you. The script validates the line — single line, 1-200
+chars, no surrounding whitespace — and drops it into /output/entry.txt.
 """
 
 from pathlib import Path
@@ -21,17 +21,18 @@ MAX_CHARS = 200
 
 
 def validate(line: str) -> str:
-    """Strip and sanity-check the line; raise ValueError on bad input."""
-    text = line.strip()
-    if not MIN_CHARS <= len(text) <= MAX_CHARS:
-        raise ValueError(
-            f"line must be {MIN_CHARS}-{MAX_CHARS} chars, got {len(text)}"
-        )
-    if "\n" in text or "\r" in text:
+    """Sanity-check the line as-is; raise ValueError on bad input."""
+    if line != line.strip():
+        raise ValueError("line must not have leading or trailing whitespace")
+    if "\n" in line or "\r" in line:
         raise ValueError("line must be a single line")
-    if not text:
-        raise ValueError("line must not be only whitespace")
-    return text
+    if not line:
+        raise ValueError("line must not be empty")
+    if not MIN_CHARS <= len(line) <= MAX_CHARS:
+        raise ValueError(
+            f"line must be {MIN_CHARS}-{MAX_CHARS} chars, got {len(line)}"
+        )
+    return line
 
 
 def main() -> None:
